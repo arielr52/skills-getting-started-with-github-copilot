@@ -101,6 +101,26 @@ section h3 {
   box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
 
+.participant-delete-btn {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  padding: 0;
+  font-size: 16px;
+  margin-left: 4px;
+  transition: color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+}
+
+.participant-delete-btn:hover {
+  color: #d32f2f;
+}
+
 .participant-avatar {
   width: 28px;
   height: 28px;
