@@ -27,6 +27,84 @@ document.addEventListener("DOMContentLoaded", () => {
           <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
         `;
 
+        // Participants section
+        const participantsSection = document.createElement('div');
+        participantsSection.className = 'participants-section';
+        const participantsHeading = document.createElement('h5');
+        participantsHeading.textContent = 'Participants';
+        participantsSection.appendChild(participantsHeading);
+
+        if (details.participants && details.participants.length > 0) {
+          const ul = document.createElement('ul');
+          ul.className = 'participants-list';
+
+          details.participants.forEach((p) => {
+            // derive a display string and initials
+            let display = '';
+            if (typeof p === 'string') display = p;
+            else if (p.name) display = p.name;
+            else if (p.email) display = p.email;
+            else display = String(p);
+
+            const initials = display
+              .split(/\s+/)
+              .map((s) => s[0])
+              .filter(Boolean)
+              .slice(0, 2)
+              .join('')
+              .toUpperCase();
+
+            const li = document.createElement('li');
+            li.className = 'participant-item';
+
+            const avatar = document.createElement('div');
+            avatar.className = 'participant-avatar';
+            avatar.textContent = initials || '?';
+
+            const text = document.createElement('span');
+            text.textContent = display;
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'participant-delete-btn';
+            deleteBtn.textContent = '×';
+            deleteBtn.setAttribute('aria-label', `Remove ${display} from ${name}`);
+            deleteBtn.addEventListener('click', async (e) => {
+              e.preventDefault();
+              try {
+                const response = await fetch(
+                  `/activities/${encodeURIComponent(name)}/unregister?email=${encodeURIComponent(display)}`,
+                  {
+                    method: "POST",
+                  }
+                );
+                if (response.ok) {
+                  fetchActivities();
+                } else {
+                  const error = await response.json();
+                  alert(`Failed to remove participant: ${error.detail}`);
+                }
+              } catch (error) {
+                alert('Failed to remove participant. Please try again.');
+                console.error('Error removing participant:', error);
+              }
+            });
+
+            li.appendChild(avatar);
+            li.appendChild(text);
+            li.appendChild(deleteBtn);
+            ul.appendChild(li);
+          });
+
+          participantsSection.appendChild(ul);
+        } else {
+          const p = document.createElement('p');
+          p.className = 'no-participants';
+          p.textContent = 'No participants yet';
+          participantsSection.appendChild(p);
+        }
+
+        activityCard.appendChild(participantsSection);
+
         activitiesList.appendChild(activityCard);
 
         // Add option to select dropdown
@@ -62,6 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = result.message;
         messageDiv.className = "success";
         signupForm.reset();
+        fetchActivities();
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
